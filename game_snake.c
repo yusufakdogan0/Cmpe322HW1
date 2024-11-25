@@ -50,12 +50,21 @@ char getch() {
     return c;
 }
 
+void generateFood(){
+    food.x = rand() % WIDTH;
+    food.y = rand() % HEIGHT;
+    for(int i = 0; i < snakeLength; i++){
+        if(snake[i].x == food.x && snake[i].y == food.y){
+            return generateFood();
+        }
+    }
+}
+
 void initializeGame() {
     // Initialize the snake's starting position
     snake[0].x = WIDTH / 2;
     snake[0].y = HEIGHT / 2;
-    food.x = rand() % WIDTH;
-    food.y = rand() % HEIGHT;
+    generateFood();
     direction[0] = 0;
     direction[1] = 1;
 }
@@ -131,8 +140,7 @@ void checkCollision() {
     // Food collision
     if (snake[0].x == food.x && snake[0].y == food.y) {
         eaten++;
-        food.x = rand() % WIDTH;
-        food.y = rand() % HEIGHT;
+        generateFood();
     }
 }
 
