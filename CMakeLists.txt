@@ -4,7 +4,5 @@ project(src C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(src
-        game_snake.c
-        snake.h
-        game_snake.c
+        game_blackcheck.c
 )
