@@ -85,7 +85,6 @@ char* draw_card(char* msg) {
 
 void player_turn() {
     while (1) {
-        system("clear");
         printf("Your current score: %d \n",yourScore);
         printf("Kurpier's current score: %d\n", botScore);
         printf("Do you want to [h]it, [s]tand, or [q]uit? ");
@@ -112,7 +111,6 @@ void player_turn() {
 
 void bot_turn() {
     while (botScore < 17) {
-        system("clear");
         char *card = draw_card("Kurpier");
         update_hand_value(&botScore, &botsAceCount, card);
         printf("Kurpier gets %d score", botScore);
@@ -124,7 +122,6 @@ void determine_winner(int bet) {
     if (gameOver != 0){
         return;
     }
-    system("clear");
     if (yourScore > WINNING_SCORE) {
         printf("You lost this round!\n");
     } else if (botScore > WINNING_SCORE || yourScore > botScore) {
@@ -136,8 +133,10 @@ void determine_winner(int bet) {
         printf("It's a tie!\n");
         yourMoney += bet;
     }
-    printf("Your Money: $%d\n", yourMoney);
+    system("clear");
     sleep(2);
+    printf("Your Money: $%d\n", yourMoney);
+
 }
 
 void game(){
