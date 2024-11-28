@@ -61,7 +61,6 @@ int get_card_value(const char *card) {
 
 
 void update_hand_value(int *score, int *ace_count, const char *card) {
-    sleep(1);
     int value = get_card_value(card);
     if (value == 11) (*ace_count)++;
     *score += value;
@@ -79,6 +78,7 @@ char* draw_card(char* msg) {
     char *card = strdup(deck[row][col]);
     printf("%s draws: %s of %s\n", msg, card, suits[row]);
     deck[row][col][0] = '\0'; // Mark card as used
+    sleep(1);
 
     return card;
 }
@@ -133,15 +133,16 @@ void determine_winner(int bet) {
         printf("It's a tie!\n");
         yourMoney += bet;
     }
-    system("clear");
     sleep(2);
+    system("clear");
+
     printf("Your Money: $%d\n", yourMoney);
 
 }
 
 void game(){
     srand(time(NULL));
-
+    sleep(2);
     system("clear");
     printf("Welcome to Blackjack with Betting!\n");
     printf("How much money do you want to exchange? $");
@@ -155,8 +156,6 @@ void game(){
         int bet;
         scanf("%d", &bet);
         if (bet < 100){
-            printf("This place is not for beggars !!!! \n Now leave !!! \n");
-            sleep(2);
             gameOver = 2;
             break;
         }
@@ -190,7 +189,6 @@ void game(){
 
 int main() {
     game();
-    endOfGame();
     return 0;
 }
 
