@@ -154,7 +154,14 @@ void game(){
         initialize_deck();
         printf("Enter your bet (or 0 to quit): ");
         int bet;
-        scanf("%d", &bet);
+        if (scanf("%d", &bet) != 1) {
+            bet = -1;  // If input is not a valid integer, set bet to -1
+        }
+        if (bet == -1){
+            printf("Invalid input, try again !!! \n");
+            sleep(2);
+            continue;
+        }
         if (bet < 100){
             gameOver = 2;
             break;
