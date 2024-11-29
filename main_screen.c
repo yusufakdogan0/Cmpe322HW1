@@ -16,7 +16,6 @@ struct termios orig_termios;
 // Restore terminal settings on exit
 void reset_terminal_mode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
-    printf("\nExiting gracefully...\n");
 }
 
 // Set terminal to raw mode for key detection
@@ -32,6 +31,7 @@ void set_terminal_mode() {
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     reset_terminal_mode();
+    printf("\nExiting gracefully...\n");
     exit(0);
 }
 
@@ -93,6 +93,7 @@ int main() {
             case '\n': // Enter key to start game
                 if (strcmp(games[current_game], "Exit") == 0) {
                     reset_terminal_mode();
+                    printf("\nExiting gracefully...\n");
                     exit(0);
                 } else {
                     run_game(games[current_game]);
@@ -101,6 +102,7 @@ int main() {
                 break;
             case 'q': // Quit the main screen
                 reset_terminal_mode();
+                printf("\nExiting gracefully...\n");
                 exit(0);
                 break;
             default:
