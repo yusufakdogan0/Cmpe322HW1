@@ -6,4 +6,5 @@ set(CMAKE_C_STANDARD 11)
 add_executable(src
         game_blackcheck.c
         main_screen.c
+        game_platform.c
 )

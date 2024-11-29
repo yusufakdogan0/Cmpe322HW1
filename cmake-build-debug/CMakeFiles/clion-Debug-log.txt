@@ -1,4 +1,4 @@
 "D:\DELL\C++\CLion 2023.3.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=D:/DELL/C++/CLion 2023.3.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S "D:\DELL\Boun\3. sınıf\1. dönem\CMPE 322\Homework1\src" -B "D:\DELL\Boun\3. sınıf\1. dönem\CMPE 322\Homework1\src\cmake-build-debug"
--- Configuring done (0.9s)
+-- Configuring done (0.3s)
 -- Generating done (0.0s)
 -- Build files have been written to: D:/DELL/Boun/3. sınıf/1. dönem/CMPE 322/Homework1/src/cmake-build-debug

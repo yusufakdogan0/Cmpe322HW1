@@ -61,6 +61,12 @@ build CMakeFiles/src.dir/main_screen.c.obj: C_COMPILER__src_unscanned_Debug D$:/
   OBJECT_DIR = CMakeFiles\src.dir
   OBJECT_FILE_DIR = CMakeFiles\src.dir
 
+build CMakeFiles/src.dir/game_platform.c.obj: C_COMPILER__src_unscanned_Debug D$:/DELL/Boun/3.$ sýnýf/1.$ dönem/CMPE$ 322/Homework1/src/game_platform.c || cmake_object_order_depends_target_src
+  DEP_FILE = CMakeFiles\src.dir\game_platform.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\src.dir
+  OBJECT_FILE_DIR = CMakeFiles\src.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target src
@@ -69,7 +75,7 @@ build CMakeFiles/src.dir/main_screen.c.obj: C_COMPILER__src_unscanned_Debug D$:/
 #############################################
 # Link the executable src.exe
 
-build src.exe: C_EXECUTABLE_LINKER__src_Debug CMakeFiles/src.dir/game_blackcheck.c.obj CMakeFiles/src.dir/main_screen.c.obj
+build src.exe: C_EXECUTABLE_LINKER__src_Debug CMakeFiles/src.dir/game_blackcheck.c.obj CMakeFiles/src.dir/main_screen.c.obj CMakeFiles/src.dir/game_platform.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\src.dir
