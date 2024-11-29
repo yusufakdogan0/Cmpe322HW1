@@ -30,8 +30,8 @@ char get_key_press();
 int main() {
     srand(time(NULL));
     char input;
-    init_game();
 
+    init_game();
     while (!game_over) {
         system("clear");
         display_grid();
@@ -97,26 +97,22 @@ void drop_gold() {
 
 // Update the grid and check for collisions
 void update_game() {
-    for (int i = HEIGHT - 1; i >= 0; i--) {
+    for (int i = HEIGHT - 2; i >= 0; i--) {
         for (int j = 0; j < WIDTH; j++) {
             if (grid[i][j] == 'G') {
-                if (i == HEIGHT - 1) {
-                    if (j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
-                        points += 10;
-                    } else {
-                        points -= 10;
-                    }
-                    grid[i][j] = '.';
+                grid[i][j] = '.';
+                if (i + 1 == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
+                    points += 10;
+                    gold_present = 0;
+                } else if (i + 1 == HEIGHT - 1) {
+                    points -= 10;
                     gold_present = 0;
                 } else {
                     grid[i + 1][j] = 'G';
-                    grid[i][j] = '.';
                 }
             }
         }
     }
-
-    // Check for win or lose condition
     if (points <= 0) {
         game_over = 1;
         printf("You lost! Press 'r' to restart or 'q' to quit.\n");
@@ -140,6 +136,7 @@ int kbhit() {
     struct termios oldt, newt;
     int ch;
     int oldf;
+
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
