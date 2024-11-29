@@ -31,12 +31,15 @@ void set_terminal_mode() {
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     reset_terminal_mode();
+    printf("Exiting gracefully...\n");
+    system("clear");
     exit(0);
 }
 
 // Signal handler for SIGINT/SIGTERM in the child process
 void child_signal_handler(int signal) {
     // Gracefully exit child game process and return to the main screen
+    printf("Exiting gracefully...\n");
     exit(0);  // This will terminate the game and return control to the main screen
 }
 
