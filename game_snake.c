@@ -56,12 +56,13 @@ char getch() {
     return c;
 }
 
+/***
 void handle_signal(int signal) {
     printf("exiting gracefully....");
     sleep(2);
     resetTermios();
     exit(0);
-}
+}***/
 
 
 void generateFood(){

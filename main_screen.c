@@ -35,6 +35,13 @@ void handle_signal(int signal) {
     exit(0);
 }
 
+// Signal handler for SIGINT/SIGTERM in the child process
+void child_signal_handler(int signal) {
+    // Gracefully exit child game process and return to the main screen
+    printf("Child process is being terminated...");
+    exit(0);  // This will terminate the game and return control to the main screen
+}
+
 // Clear screen and display the main menu
 void display_menu() {
     system("clear");
@@ -57,6 +64,9 @@ void run_game(const char *game) {
     pid_t pid = fork();
 
     if (pid == 0) {  // Child process
+        // Change the signal handler
+        signal(SIGINT, child_signal_handler);
+        signal(SIGTERM, child_signal_handler);
         // Launch the game
         execl(game, game, NULL);
         perror("Failed to launch game");
@@ -95,9 +105,11 @@ int main() {
                     reset_terminal_mode();
                     printf("\nExiting gracefully...\n");
                     exit(0);
-                } else {
+                }
+                else {
                     run_game(games[current_game]);
                     display_menu();  // Redisplay the menu after game exits
+                    continue;
                 }
                 break;
             case 'q': // Quit the main screen

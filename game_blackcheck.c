@@ -24,12 +24,13 @@ const char *suits[] = {"Hearts", "Diamonds", "Clubs", "Spades"};
 
 void game();
 
+/***
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     printf("exiting gracefully....");
     sleep(2);
     exit(0);
-}
+}***/
 
 void endOfGame(){
     if (gameOver == 0){ return;}
