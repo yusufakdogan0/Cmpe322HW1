@@ -16,7 +16,6 @@ struct termios orig_termios;
 // Restore terminal settings on exit
 void reset_terminal_mode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
-    printf("\nExiting gracefully...\n");
 }
 
 // Set terminal to raw mode for key detection
@@ -41,22 +40,12 @@ void child_signal_handler(int signal) {
     exit(0);  // This will terminate the game and return control to the main screen
 }
 
-// Clear screen and display the main menu
-void display_menu() {
-    system("clear");
-    printf("Video Game Console Main Screen\n");
-    printf("==============================\n\n");
-    printf("Use 'w'/'s' to navigate, 'a'/'d' to select buttons, and 'Enter' to start.\n");
-    printf("Press 'q' to quit.\n\n");
-
-    for (int i = 0; i < total_games; i++) {
-        if (i == current_game) {
-            printf("-> %s\n", games[i]);
-        } else {
-            printf("   %s\n", games[i]);
-        }
-    }
+void prevent_signal_handler(int sig) {
+    // Handle signals in the parent process (prevent termination)
+    printf("Parent process received signal %d, ignoring...\n", sig);
 }
+
+
 
 // Run the selected game as a child process
 void run_game(const char *game) {
@@ -72,29 +61,34 @@ void run_game(const char *game) {
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
     } else if (pid > 0) {  // Parent process (main screen)
-        int status;
-        waitpid(pid, &status, 0); // Wait for the child process to finish
-
-        if (WIFEXITED(status)) {
-            // Game exited gracefully, restart the main screen
-            display_menu();  // Redisplay the menu after game exits
-        }
+        signal(SIGINT, prevent_signal_handler);
+        signal(SIGTERM, prevent_signal_handler);
+        wait(NULL);// Wait for the child process to finish
     } else {
         perror("Fork failed");
         exit(EXIT_FAILURE);
     }
 }
 
-int main() {
-    set_terminal_mode();
+// Clear screen and display the main menu
+void display_menu() {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
+    system("clear");
+    printf("Video Game Console Main Screen\n");
+    printf("==============================\n\n");
+    printf("Use 'w'/'s' to navigate and 'Enter' to start.\n");
+    printf("Press 'q' to quit.\n\n");
 
-    char input;
-    display_menu();
-
+    for (int i = 0; i < total_games; i++) {
+        if (i == current_game) {
+            printf("-> %s\n", games[i]);
+        } else {
+            printf("   %s\n", games[i]);
+        }
+    }
     while (1) {
-        input = getchar();
+        char input = getchar();
         switch (input) {
             case 'w': // Navigate up
                 current_game = (current_game - 1 + total_games) % total_games;
@@ -109,19 +103,25 @@ int main() {
             case '\n': // Enter key to start game
                 if (strcmp(games[current_game], "Exit") == 0) {
                     reset_terminal_mode();
+                    printf("\nExiting gracefully...\n");
                     exit(0);
                 } else {
                     run_game(games[current_game]);
-                    display_menu();  // Redisplay the menu after game exits
+                    display_menu();
                 }
                 break;
             case 'q': // Quit the main screen
                 reset_terminal_mode();
+                printf("\nExiting gracefully...\n");
                 exit(0);
                 break;
             default:
                 break;
         }
     }
-    return 0;
+}
+
+int main() {
+    set_terminal_mode();
+    display_menu();
 }

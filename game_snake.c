@@ -104,7 +104,7 @@ void drawBoard() {
     system("clear"); // Clear screen in Linux
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            printf("%c", board[i][j]); // Print each character
+            printf("%c ", board[i][j]); // Print each character
         }
         printf("\n");
     }
