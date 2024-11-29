@@ -25,6 +25,7 @@ int platform_pos = WIDTH / 2 - PLATFORM_WIDTH / 2;
 int points = INITIAL_POINTS;
 int game_over = 0;
 int gold_present = 0;
+int gold_col = -1;
 char grid[HEIGHT][WIDTH];
 
 // Function declarations for game logic
@@ -37,9 +38,11 @@ void drop_gold();
 int main() {
     srand(time(NULL));
     char input;
+
     initializeTermios(); // Set terminal mode
     init_game();
-    while (1) {
+
+    while (!game_over) {
         system("clear");
         display_grid();
         printf("\nPoints: %d\n", points);
@@ -50,23 +53,20 @@ int main() {
             if (input == 'q') {
                 printf("Exiting the game.\n");
                 break;
-            }
-            else if (input == 'r') {
+            } else if (input == 'r') {
                 init_game();
-            }
-            else if (input == 'a' || input == 'd' && !game_over) {
+                continue;
+            } else if (input == 'a' || input == 'd') {
                 move_platform(input);
             }
         }
 
-        if (!game_over){
-            if (!gold_present) {
-                drop_gold();
-            }
-            update_game();
+        if (!gold_present) {
+            drop_gold();
         }
 
-        usleep(TIME_DELAY); // Delay for easier gameplay
+        update_game();
+        usleep(TIME_DELAY); // Game tick
     }
 
     resetTermios(); // Restore terminal settings
@@ -78,13 +78,13 @@ void init_game() {
     points = INITIAL_POINTS;
     game_over = 0;
     gold_present = 0;
+    gold_col = -1;
     platform_pos = WIDTH / 2 - PLATFORM_WIDTH / 2;
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             grid[i][j] = '.';
         }
     }
-
 }
 
 // Display the grid
@@ -103,8 +103,8 @@ void display_grid() {
 
 // Drop a single gold at a random column
 void drop_gold() {
-    int col = rand() % WIDTH;
-    grid[0][col] = 'G';
+    gold_col = rand() % WIDTH;
+    grid[0][gold_col] = 'G';
     gold_present = 1;
 }
 
@@ -117,12 +117,10 @@ void update_game() {
                 if (i + 1 == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
                     points += 10;
                     gold_present = 0;
-                }
-                else if (i + 1 == HEIGHT - 1) {
+                } else if (i + 1 == HEIGHT - 1) {
                     points -= 10;
                     gold_present = 0;
-                }
-                else {
+                } else {
                     grid[i + 1][j] = 'G';
                 }
             }
@@ -151,6 +149,8 @@ void initializeTermios() {
     tcgetattr(STDIN_FILENO, &original);
     current = original;
     current.c_lflag &= ~(ICANON | ECHO);
+    current.c_cc[VMIN] = 0;
+    current.c_cc[VTIME] = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &current);
 }
 
