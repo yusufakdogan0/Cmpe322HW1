@@ -1,47 +1,160 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h> // For usleep
-#include <termios.h> // For non-blocking input
 #include <time.h>
-#include <sys/wait.h>
-#include <signal.h>
+#include <unistd.h>
+#include <sys/select.h>
+#include <termios.h>
 
 #define WIDTH 15
 #define HEIGHT 15
+#define PLATFORM_WIDTH 3
+#define INITIAL_POINTS 20
+#define TIME_DELAY 300000 // Microseconds
 
-// Initialize board size
-char board[HEIGHT][WIDTH];
-// Global variables and structures
-typedef struct {
-    int x, y;
-} Point;
-
-Point snake[225];
-int snakeLength = 1;
-Point food;
-int gameOver = 0;
-int direction[2];
-int eaten = 0;
-int gameStop = 0;
-
-// Terminal input configuration
+// Terminal settings
 struct termios original, current;
 
+// Function declarations for terminal handling
+void initializeTermios();
+void resetTermios();
+int kbhit();
+char getch();
 
+// Game variables
+int platform_pos = WIDTH / 2 - PLATFORM_WIDTH / 2;
+int points = INITIAL_POINTS;
+int game_over = 0;
+int gold_present = 0;
+char grid[HEIGHT][WIDTH];
 
+// Function declarations for game logic
+void init_game();
+void display_grid();
+void update_game();
+void move_platform(char direction);
+void drop_gold();
 
+int main() {
+    srand(time(NULL));
+    char input;
 
+    initializeTermios(); // Set terminal mode
+    init_game();
+
+    while (!game_over) {
+        system("clear");
+        display_grid();
+        printf("\nPoints: %d\n", points);
+        printf("Press 'q' to quit, 'r' to restart\n");
+
+        if (kbhit()) {
+            input = getch();
+            if (input == 'q') {
+                printf("Exiting the game.\n");
+                break;
+            } else if (input == 'r') {
+                init_game();
+            } else if (input == 'a' || input == 'd') {
+                move_platform(input);
+            }
+        }
+
+        if (!gold_present) {
+            drop_gold();
+        }
+
+        update_game();
+        usleep(TIME_DELAY); // Delay for easier gameplay
+    }
+
+    resetTermios(); // Restore terminal settings
+    return 0;
+}
+
+// Initialize the game grid and platform position
+void init_game() {
+    points = INITIAL_POINTS;
+    game_over = 0;
+    gold_present = 0;
+    platform_pos = WIDTH / 2 - PLATFORM_WIDTH / 2;
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            grid[i][j] = '.';
+        }
+    }
+}
+
+// Display the grid
+void display_grid() {
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            if (i == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
+                printf("_");
+            } else {
+                printf("%c", grid[i][j]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Drop a single gold at a random column
+void drop_gold() {
+    int col = rand() % WIDTH;
+    grid[0][col] = 'G';
+    gold_present = 1;
+}
+
+// Update the grid and check for collisions
+void update_game() {
+    for (int i = HEIGHT - 2; i >= 0; i--) {
+        for (int j = 0; j < WIDTH; j++) {
+            if (grid[i][j] == 'G') {
+                grid[i][j] = '.';
+                if (i + 1 == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
+                    points += 10;
+                    gold_present = 0;
+                } else if (i + 1 == HEIGHT - 1) {
+                    points -= 10;
+                    gold_present = 0;
+                } else {
+                    grid[i + 1][j] = 'G';
+                }
+            }
+        }
+    }
+    if (points <= 0) {
+        game_over = 1;
+        printf("You lost! Press 'r' to restart or 'q' to quit.\n");
+    } else if (points >= 100) {
+        game_over = 1;
+        printf("You won! Press 'r' to restart or 'q' to quit.\n");
+    }
+}
+
+// Move the platform left or right
+void move_platform(char direction) {
+    if (direction == 'a' && platform_pos > 0) {
+        platform_pos--;
+    } else if (direction == 'd' && platform_pos < WIDTH - PLATFORM_WIDTH) {
+        platform_pos++;
+    }
+}
+
+// Initialize terminal in non-canonical mode
 void initializeTermios() {
-    tcgetattr(STDIN_FILENO, &original); // Get current terminal attributes
+    tcgetattr(STDIN_FILENO, &original);
     current = original;
-    current.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
-    tcsetattr(STDIN_FILENO, TCSANOW, &current); // Apply new attributes
+    current.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &current);
 }
 
+// Restore terminal to original state
 void resetTermios() {
-    tcsetattr(STDIN_FILENO, TCSANOW, &original); // Restore original attributes
+    tcsetattr(STDIN_FILENO, TCSANOW, &original);
 }
 
+// Check if a key has been pressed
 int kbhit() {
     struct timeval tv = {0, 0};
     fd_set read_fds;
@@ -50,157 +163,9 @@ int kbhit() {
     return select(STDIN_FILENO + 1, &read_fds, NULL, NULL, &tv);
 }
 
+// Get a single character input
 char getch() {
     char c;
     read(STDIN_FILENO, &c, 1);
     return c;
-}
-
-/***
-void handle_signal(int signal) {
-    printf("exiting gracefully....");
-    sleep(2);
-    resetTermios();
-    exit(0);
-}***/
-
-
-void generateFood(){
-    food.x = rand() % WIDTH;
-    food.y = rand() % HEIGHT;
-    for(int i = 0; i < snakeLength; i++){
-        if(snake[i].x == food.x && snake[i].y == food.y){
-            return generateFood();
-        }
-    }
-}
-
-void initializeGame() {
-    // Initialize the snake's starting position
-    snake[0].x = WIDTH / 2;
-    snake[0].y = HEIGHT / 2;
-    generateFood();
-    direction[0] = 0;
-    direction[1] = 1;
-}
-
-void drawBoard() {
-    // Fill the board with empty spaces
-    for (int i = 0; i < HEIGHT; i++) {
-        for (int j = 0; j < WIDTH; j++) {
-            board[i][j] = '.'; // Empty space
-        }
-    }
-    board[snake[0].y][snake[0].x] = '0';
-    // Place the snake on the board
-    for (int i = 1; i < snakeLength; i++) {
-        board[snake[i].y][snake[i].x] = '#';
-    }
-
-    // Place the food on the board
-    board[food.y][food.x] = 'X'; // 'X' for food
-
-    // Print the board to the screen
-    system("clear"); // Clear screen in Linux
-    for (int i = 0; i < HEIGHT; i++) {
-        for (int j = 0; j < WIDTH; j++) {
-            printf("%c ", board[i][j]); // Print each character
-        }
-        printf("\n");
-    }
-}
-
-void moveSnake() {
-    if (gameStop) {
-        return;
-    }
-    Point prev = snake[0], temp;
-    snake[0].y += direction[0];
-    snake[0].x += direction[1];
-    for (int i = 1; i < snakeLength; i++) {
-        temp = snake[i];
-        snake[i] = prev;
-        prev = temp;
-    }
-    if (eaten != 0) {
-        snake[snakeLength] = prev;
-        snakeLength++;
-        eaten--;
-    }
-}
-
-Point nextLocation() {
-    Point point = snake[0];
-    point.x += direction[1];
-    point.y += direction[0];
-    return point;
-}
-
-void checkCollision() {
-    gameStop = 0;
-    Point next = nextLocation();
-    // Wall collision
-    if (next.x < 0 || next.x > WIDTH - 1 ||
-        next.y < 0 || next.y > HEIGHT - 1) {
-        gameStop = 1;
-    }
-
-    // Self collision
-    for (int i = 1; i < snakeLength; i++) {
-        if (next.x == snake[i].x && next.y == snake[i].y) {
-            gameStop = 1;
-        }
-    }
-
-    // Food collision
-    if (snake[0].x == food.x && snake[0].y == food.y) {
-        eaten++;
-        generateFood();
-    }
-}
-
-void getInput() {
-    usleep(100000); // 100 milliseconds
-    if (kbhit()) { // Check if a key is pressed
-        switch (getch()) {
-            case 'w':
-                direction[0] = -1;
-                direction[1] = 0;
-                break;
-            case 's':
-                direction[0] = 1;
-                direction[1] = 0;
-                break;
-            case 'a':
-                direction[0] = 0;
-                direction[1] = -1;
-                break;
-            case 'd':
-                direction[0] = 0;
-                direction[1] = 1;
-                break;
-
-            case 'q':
-                gameOver = 1;
-        }
-    }
-}
-
-int main() {
-    //signal(SIGINT, handle_signal);
-    //signal(SIGTERM, handle_signal);
-    srand(time(0));
-    initializeTermios(); // Initialize terminal for non-blocking input
-    atexit(resetTermios); // Reset terminal settings on exit
-    initializeGame();
-
-    while (!gameOver) {
-        drawBoard();
-        getInput();
-        checkCollision();
-        moveSnake();
-    }
-
-    printf("Game Over!\n");
-    return 0;
 }
