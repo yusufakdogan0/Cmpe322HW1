@@ -37,11 +37,9 @@ void drop_gold();
 int main() {
     srand(time(NULL));
     char input;
-
     initializeTermios(); // Set terminal mode
     init_game();
-
-    while (!game_over) {
+    while (1) {
         system("clear");
         display_grid();
         printf("\nPoints: %d\n", points);
@@ -52,18 +50,22 @@ int main() {
             if (input == 'q') {
                 printf("Exiting the game.\n");
                 break;
-            } else if (input == 'r') {
+            }
+            else if (input == 'r') {
                 init_game();
-            } else if (input == 'a' || input == 'd') {
+            }
+            else if (input == 'a' || input == 'd' && !game_over) {
                 move_platform(input);
             }
         }
 
-        if (!gold_present) {
-            drop_gold();
+        if (!game_over){
+            if (!gold_present) {
+                drop_gold();
+            }
+            update_game();
         }
 
-        update_game();
         usleep(TIME_DELAY); // Delay for easier gameplay
     }
 
@@ -82,6 +84,7 @@ void init_game() {
             grid[i][j] = '.';
         }
     }
+
 }
 
 // Display the grid
@@ -114,10 +117,12 @@ void update_game() {
                 if (i + 1 == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {
                     points += 10;
                     gold_present = 0;
-                } else if (i + 1 == HEIGHT - 1) {
+                }
+                else if (i + 1 == HEIGHT - 1) {
                     points -= 10;
                     gold_present = 0;
-                } else {
+                }
+                else {
                     grid[i + 1][j] = 'G';
                 }
             }
