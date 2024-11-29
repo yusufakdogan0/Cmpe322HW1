@@ -16,6 +16,7 @@ struct termios orig_termios;
 // Restore terminal settings on exit
 void reset_terminal_mode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+    printf("\nExiting gracefully...\n");
 }
 
 // Set terminal to raw mode for key detection
@@ -31,14 +32,12 @@ void set_terminal_mode() {
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     reset_terminal_mode();
-    printf("\nExiting gracefully...\n");
     exit(0);
 }
 
 // Signal handler for SIGINT/SIGTERM in the child process
 void child_signal_handler(int signal) {
     // Gracefully exit child game process and return to the main screen
-    printf("Child process is being terminated...");
     exit(0);  // This will terminate the game and return control to the main screen
 }
 
@@ -64,15 +63,22 @@ void run_game(const char *game) {
     pid_t pid = fork();
 
     if (pid == 0) {  // Child process
-        // Change the signal handler
+        // Register signal handlers for SIGINT and SIGTERM in the child process
         signal(SIGINT, child_signal_handler);
         signal(SIGTERM, child_signal_handler);
+
         // Launch the game
         execl(game, game, NULL);
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
     } else if (pid > 0) {  // Parent process (main screen)
-        waitpid(pid, NULL, 0); // Wait for the child process to finish
+        int status;
+        waitpid(pid, &status, 0); // Wait for the child process to finish
+
+        if (WIFEXITED(status)) {
+            // Game exited gracefully, restart the main screen
+            display_menu();  // Redisplay the menu after game exits
+        }
     } else {
         perror("Fork failed");
         exit(EXIT_FAILURE);
@@ -103,18 +109,14 @@ int main() {
             case '\n': // Enter key to start game
                 if (strcmp(games[current_game], "Exit") == 0) {
                     reset_terminal_mode();
-                    printf("\nExiting gracefully...\n");
                     exit(0);
-                }
-                else {
+                } else {
                     run_game(games[current_game]);
                     display_menu();  // Redisplay the menu after game exits
-                    continue;
                 }
                 break;
             case 'q': // Quit the main screen
                 reset_terminal_mode();
-                printf("\nExiting gracefully...\n");
                 exit(0);
                 break;
             default:

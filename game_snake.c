@@ -187,8 +187,8 @@ void getInput() {
 }
 
 int main() {
-    signal(SIGINT, handle_signal);
-    signal(SIGTERM, handle_signal);
+    //signal(SIGINT, handle_signal);
+    //signal(SIGTERM, handle_signal);
     srand(time(0));
     initializeTermios(); // Initialize terminal for non-blocking input
     atexit(resetTermios); // Reset terminal settings on exit

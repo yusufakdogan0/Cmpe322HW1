@@ -207,8 +207,8 @@ void game(){
 
 
 int main() {
-    signal(SIGINT, handle_signal);
-    signal(SIGTERM, handle_signal);
+    //signal(SIGINT, handle_signal);
+    //signal(SIGTERM, handle_signal);
     game();
     return 0;
 }
