@@ -3,6 +3,8 @@
 #include <unistd.h> // For usleep
 #include <termios.h> // For non-blocking input
 #include <time.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #define WIDTH 15
 #define HEIGHT 15
@@ -24,6 +26,10 @@ int gameStop = 0;
 
 // Terminal input configuration
 struct termios original, current;
+
+
+
+
 
 void initializeTermios() {
     tcgetattr(STDIN_FILENO, &original); // Get current terminal attributes
@@ -49,6 +55,14 @@ char getch() {
     read(STDIN_FILENO, &c, 1);
     return c;
 }
+
+void handle_signal(int signal) {
+    printf("exiting gracefully....");
+    sleep(2);
+    resetTermios();
+    exit(0);
+}
+
 
 void generateFood(){
     food.x = rand() % WIDTH;
@@ -172,6 +186,8 @@ void getInput() {
 }
 
 int main() {
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
     srand(time(0));
     initializeTermios(); // Initialize terminal for non-blocking input
     atexit(resetTermios); // Reset terminal settings on exit

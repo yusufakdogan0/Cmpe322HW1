@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 
 
@@ -22,8 +24,15 @@ const char *suits[] = {"Hearts", "Diamonds", "Clubs", "Spades"};
 
 void game();
 
+// Signal handler for graceful exit
+void handle_signal(int signal) {
+    printf("exiting gracefully....");
+    sleep(2);
+    exit(0);
+}
 
 void endOfGame(){
+    if (gameOver == 0){ return;}
     if (gameOver == 1){
         printf("Only idiots would quit after betting the money");
     }
@@ -113,7 +122,7 @@ void bot_turn() {
     while (botScore < 17) {
         char *card = draw_card("Kurpier");
         update_hand_value(&botScore, &botsAceCount, card);
-        printf("Kurpier gets %d score", botScore);
+        printf("Kurpier gets %d score \n", botScore);
         sleep(2);
     }
 }
@@ -140,6 +149,11 @@ void determine_winner(int bet) {
 
 }
 
+void clear_input_buffer() {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);  // Read until newline or EOF
+}
+
 void game(){
     srand(time(NULL));
     sleep(2);
@@ -149,26 +163,23 @@ void game(){
     scanf("%d", &yourMoney);
 
 
-    sleep(1);
     while (gameOver==0 && yourMoney > 0) {
+        system("clear");
         initialize_deck();
-        printf("Enter your bet (or 0 to quit): ");
-        int bet;
-        if (scanf("%d", &bet) != 1) {
-            bet = -1;  // If input is not a valid integer, set bet to -1
-        }
-        if (bet == -1){
+        printf("Enter your bet: ");
+        int bet = 0;
+        int valid = scanf("%d", &bet);
+        if ( valid != 1) {
             printf("Invalid input, try again !!! \n");
-            sleep(2);
+            clear_input_buffer();
             continue;
         }
-        if (bet < 100){
+        else if (bet < 100){
             gameOver = 2;
             break;
         }
         else if (bet > yourMoney){
             printf("You can only bet the amount of coins u have !!! \n");
-            sleep(2);
             continue;
         }
         else{
@@ -195,6 +206,8 @@ void game(){
 
 
 int main() {
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
     game();
     return 0;
 }
