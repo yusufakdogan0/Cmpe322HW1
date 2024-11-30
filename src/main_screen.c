@@ -58,6 +58,8 @@ void run_game(const char *game) {
         // Register signal handlers for SIGINT and SIGTERM in the child process
         signal(SIGINT, child_signal_handler);
         signal(SIGTERM, child_signal_handler);
+        reset_terminal_mode();
+        
 
         // Launch the game
         execl(game, game, NULL);
@@ -67,6 +69,7 @@ void run_game(const char *game) {
         signal(SIGINT, prevent_signal_handler);
         signal(SIGTERM, prevent_signal_handler);
         wait(NULL);// Wait for the child process to finish
+        set_terminal_mode();
     } else {
         perror("Fork failed");
         exit(EXIT_FAILURE);

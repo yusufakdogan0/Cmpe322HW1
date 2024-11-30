@@ -4,7 +4,7 @@ if [ ! -d "mount" ]; then
 fi
 
 # Check if the loop device is already in use and detach if necessary
-if losetup | grep -q "/dev/loop0"; then
+if sudo losetup | grep -q "/dev/loop0"; then
     sudo losetup -d /dev/loop0
 fi
 
@@ -16,7 +16,9 @@ if ! sudo file -sL storage_vgc.img | grep -q "ext4"; then
     sudo mkfs.ext4 storage_vgc.img
 fi
 
-sudo mount -o loop storage_vgc.img mount
+sudo mount -o loop,rw storage_vgc.img mount
+sudo chmod 777 mount
+sudo chown $USER:$USER mount
 
 # Remove existing symbolic link (if any) and create a new one
 if [ -L /dev/device_file ]; then
