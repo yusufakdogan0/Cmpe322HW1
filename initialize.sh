@@ -6,6 +6,14 @@ fi
 # Create the disk image (100MB in this example)
 dd if=/dev/zero of="storage_vgc.img" bs=1M count=100 status=progress
 
+# Set all permissions (777) for .sh files in the current directory
+for file in *.sh; do
+    if [ -f "$file" ]; then
+        chmod 777 "$file"
+        echo "Permissions for $file set to 777"
+    fi
+done
+
 # Create bin directory if it doesn't exist and ensure it's empty
 mkdir -p bin
 rm -rf bin/*  # Ensure bin is empty before compiling

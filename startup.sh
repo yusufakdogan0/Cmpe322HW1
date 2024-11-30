@@ -10,6 +10,12 @@ fi
 
 # Set up the loop device and mount the image
 sudo losetup /dev/loop0 storage_vgc.img
+
+# Check if the image has a file system (e.g., ext4) and format it if necessary
+if ! sudo file -sL storage_vgc.img | grep -q "ext4"; then
+    sudo mkfs.ext4 storage_vgc.img
+fi
+
 sudo mount -o loop storage_vgc.img mount
 
 # Remove existing symbolic link (if any) and create a new one
