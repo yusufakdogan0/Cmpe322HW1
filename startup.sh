@@ -1,5 +1,12 @@
-# Create the mount directory if it doesn't exist
-[ -d mount ] || mkdir mount
+# Check and create mount directory if it doesn't exist
+if [ ! -d "mount" ]; then
+    mkdir mount
+fi
+
+# Check if the loop device is already in use and detach if necessary
+if losetup | grep -q "/dev/loop0"; then
+    sudo losetup -d /dev/loop0
+fi
 
 # Set up the loop device and mount the image
 sudo losetup /dev/loop0 storage_vgc.img
@@ -11,7 +18,9 @@ if [ -L /dev/device_file ]; then
 fi
 sudo ln -sf /dev/loop0 /dev/device_file
 
-# Add the files from bin to the mounted directory
+# Copy the compiled binaries to the mounted directory
 [ -d mount/bin ] || mkdir mount/bin
 cp bin/* mount/bin/
-sudo chmod +x mount/bin*
+
+# Make the binaries executable
+sudo chmod +x mount/bin/*
