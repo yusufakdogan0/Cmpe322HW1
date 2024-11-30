@@ -11,6 +11,6 @@ dd if=/dev/zero of="storage_vgc.img" bs=1M count=100
 mkdir -p bin
 rm -rf bin/*  # Ensure bin is empty before compiling
 gcc src/game_snake.c -o bin/game_snake
-gcc src/game_blackcheck.c -o bin/game_blackcheck
+gcc src/game_blackjack.c -o bin/game_blackjack
 gcc src/game_platform.c -o bin/game_platform
 gcc src/main_screen.c -o bin/main_screen

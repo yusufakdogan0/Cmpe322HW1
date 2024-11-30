@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 
 // Game list
-const char *games[] = {"game_snake", "game_platform", "game_blackcheck", "Exit"};
+const char *games[] = {"game_snake", "game_platform", "game_blackjack", "Exit"};
 int current_game = 0;
 int total_games = sizeof(games) / sizeof(games[0]);
 
