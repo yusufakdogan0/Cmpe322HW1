@@ -32,7 +32,6 @@ void set_terminal_mode() {
 void handle_signal(int signal) {
     reset_terminal_mode();
     printf("Exiting gracefully...\n");
-    system("clear");
     exit(0);
 }
 
@@ -67,7 +66,7 @@ void run_game(const char *game) {
         exit(EXIT_FAILURE);
     } else if (pid > 0) {  // Parent process (main screen)
         signal(SIGINT, prevent_signal_handler);
-        signal(SIGTERM, prevent_signal_handler);
+        signal(SIGTERM, handle_signal);
         wait(NULL);// Wait for the child process to finish
         set_terminal_mode();
     } else {

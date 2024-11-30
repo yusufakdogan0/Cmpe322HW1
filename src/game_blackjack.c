@@ -135,10 +135,11 @@ void determine_winner(int bet) {
         printf("It's a tie!\n");
         yourMoney += bet;
     }
-    sleep(2);
-    system("clear");
-
+    
+    printf("Your Point: $%d", yourScore);
+    printf("Kurpier: $%d", botScore);
     printf("Your Money: $%d\n", yourMoney);
+    sleep(2);
 
 }
 
@@ -159,6 +160,7 @@ void game(){
     while (gameOver==0 && yourMoney > 0) {
         system("clear");
         initialize_deck();
+        printf("Your money: $%d", yourMoney);
         printf("Enter your bet: ");
         int bet = 0;
         int valid = scanf("%d", &bet);
