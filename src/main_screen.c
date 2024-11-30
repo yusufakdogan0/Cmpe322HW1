@@ -5,12 +5,16 @@
 #include <termios.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
+#define MAX_GAMES 100
 
 // Game list
-const char *games[] = {"game_snake", "game_platform", "game_blackjack", "Exit"};
+char *games[MAX_GAMES];
 int current_game = 0;
 int child_id = 0;
-int total_games = sizeof(games) / sizeof(games[0]);
+int total_games = 0;
 struct termios orig_termios;
 
 // Restore terminal settings on exit
@@ -31,7 +35,7 @@ void set_terminal_mode() {
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     reset_terminal_mode();
-    if (child_id != 0){
+    if (child_id != 0) {
         kill(child_id, signal);
     }
     printf("Exiting gracefully...\n");
@@ -40,38 +44,59 @@ void handle_signal(int signal) {
 
 // Signal handler for SIGINT/SIGTERM in the child process
 void child_signal_handler(int signal) {
-    // Gracefully exit child game process and return to the main screen
     printf("Exiting gracefully...\n");
-    exit(0);  // This will terminate the game and return control to the main screen
+    exit(0);
 }
 
 void prevent_signal_handler(int sig) {
-    // Handle signals in the parent process (prevent termination)
     printf("Parent process received signal %d, ignoring...\n", sig);
 }
 
+// Dynamically populate the games array with executables starting with "game_"
+void scan_games_directory() {
+    DIR *dir;
+    struct dirent *entry;
+    struct stat file_stat;
 
+    dir = opendir(".");
+    if (!dir) {
+        perror("Failed to open directory");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((entry = readdir(dir)) != NULL) {
+        // Check if the file starts with "game_" and is executable
+        if (strncmp(entry->d_name, "game_", 5) == 0) {
+            stat(entry->d_name, &file_stat);
+            if (file_stat.st_mode & S_IXUSR && !S_ISDIR(file_stat.st_mode)) {
+                games[total_games] = strdup(entry->d_name);
+                total_games++;
+                if (total_games >= MAX_GAMES - 1) {
+                    break;
+                }
+            }
+        }
+    }
+    closedir(dir);
+
+    games[total_games++] = strdup("Exit"); // Add the Exit option
+}
 
 // Run the selected game as a child process
 void run_game(const char *game) {
     pid_t pid = fork();
-
     if (pid == 0) {  // Child process
-        // Register signal handlers for SIGINT and SIGTERM in the child process
         signal(SIGINT, child_signal_handler);
         signal(SIGTERM, child_signal_handler);
         reset_terminal_mode();
-        
-
-        // Launch the game
         execl(game, game, NULL);
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
-    } else if (pid > 0) {  // Parent process (main screen)
+    } else if (pid > 0) {  // Parent process
         child_id = pid;
         signal(SIGINT, prevent_signal_handler);
         signal(SIGTERM, handle_signal);
-        wait(NULL);// Wait for the child process to finish
+        wait(NULL);
         child_id = 0;
         set_terminal_mode();
     } else {
@@ -98,13 +123,13 @@ void display_menu() {
 
         char input = getchar();
         switch (input) {
-            case 'w': // Navigate up
+            case 'w':
                 current_game = (current_game - 1 + total_games) % total_games;
                 break;
-            case 's': // Navigate down
+            case 's':
                 current_game = (current_game + 1) % total_games;
                 break;
-            case '\n': // Enter key to start game
+            case '\n':
                 if (strcmp(games[current_game], "Exit") == 0) {
                     reset_terminal_mode();
                     printf("\nExiting gracefully...\n");
@@ -113,7 +138,7 @@ void display_menu() {
                     run_game(games[current_game]);
                 }
                 break;
-            case 'q': // Quit the main screen
+            case 'q':
                 reset_terminal_mode();
                 printf("\nExiting gracefully...\n");
                 exit(0);
@@ -125,6 +150,7 @@ void display_menu() {
 }
 
 int main() {
+    scan_games_directory();
     set_terminal_mode();
     display_menu();
 }

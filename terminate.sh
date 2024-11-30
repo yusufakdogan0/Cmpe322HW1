@@ -1,6 +1,7 @@
 # Unmount the image if it's already mounted
 if mount | grep "storage_vgc.img" > /dev/null; then
     sudo umount mount
+    sleep 1
 fi
 
 # Detach the loop device

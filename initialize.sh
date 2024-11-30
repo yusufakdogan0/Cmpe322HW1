@@ -4,7 +4,7 @@ if [ -f "storage_vgc.img" ]; then
 fi
 
 # Create the disk image (100MB in this example)
-dd if=/dev/zero of="storage_vgc.img" bs=1M count=100 status=progress
+dd if=/dev/zero of="storage_vgc.img" bs=1M count=2 status=progress
 
 # Set all permissions (777) for .sh files in the current directory
 for file in *.sh; do

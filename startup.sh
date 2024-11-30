@@ -3,12 +3,8 @@ if [ ! -d "mount" ]; then
     mkdir mount
 fi
 
-# Check if the loop device is already in use and detach if necessary
-if sudo losetup | grep -q "/dev/loop0"; then
-    sudo losetup -d /dev/loop0
-fi
-
 # Set up the loop device and mount the image
+sudo losetup -d /dev/loop0
 sudo losetup /dev/loop0 storage_vgc.img
 
 # Check if the image has a file system (e.g., ext4) and format it if necessary
