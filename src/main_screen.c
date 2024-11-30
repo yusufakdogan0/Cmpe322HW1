@@ -92,16 +92,15 @@ void run_game(const char *game) {
         execl(game, game, NULL);
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
-    } else if (pid > 0) {  // Parent process
+    } 
+    else if (pid > 0) {  // Parent process
         child_id = pid;
         signal(SIGINT, prevent_signal_handler);
         signal(SIGTERM, handle_signal);
         wait(NULL);
         child_id = 0;
+        reset_terminal_mode();
         set_terminal_mode();
-    } else {
-        perror("Fork failed");
-        exit(EXIT_FAILURE);
     }
 }
 
