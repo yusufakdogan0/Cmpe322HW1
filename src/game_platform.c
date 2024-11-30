@@ -43,10 +43,13 @@ int main() {
     init_game();
 
     while (1) {
-        system("clear");
-        display_grid();
-        printf("\nPoints: %d\n", points);
-        printf("Press 'q' to quit, 'r' to restart\n");
+        if (!game_over){
+            system("clear");
+            display_grid();
+            printf("\nPoints: %d\n", points);
+            printf("Press 'q' to quit, 'r' to restart\n");
+        }
+        
 
         if (kbhit()) {
             input = getch();
@@ -89,6 +92,7 @@ void init_game() {
 
 // Display the grid
 void display_grid() {
+
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (i == HEIGHT - 1 && j >= platform_pos && j < platform_pos + PLATFORM_WIDTH) {

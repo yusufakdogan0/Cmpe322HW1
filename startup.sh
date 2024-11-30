@@ -14,6 +14,8 @@ sudo ln -sf /dev/loop0 /dev/device_file
 # Add the files from bin to the mounted directory
 [ -d mount/bin ] || mkdir mount/bin
 cp bin/* mount/bin/
+sudo chmod +x mount/bin*
+
 
 # Start the game
-./mount/bin/main_screen
+./bin/mount/main_screen
