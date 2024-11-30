@@ -7,9 +7,6 @@ fi
 # Create the disk image (100MB in this example)
 dd if=/dev/zero of="storage_vgc.img" bs=1M count=100
 
-# Format the disk image as ext4
-mkfs.ext4 "storage_vgc.img"
-
 # Compile C source files
 mkdir -p bin
 rm -rf bin/*  # Ensure bin is empty before compiling
