@@ -42,7 +42,7 @@ int main() {
     initializeTermios(); // Set terminal mode
     init_game();
 
-    while (!game_over) {
+    while (1) {
         system("clear");
         display_grid();
         printf("\nPoints: %d\n", points);
