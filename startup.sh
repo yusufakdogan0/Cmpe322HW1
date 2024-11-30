@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Create the mount directory if it doesn't exist
 [ -d mount ] || mkdir mount
 
@@ -7,9 +5,16 @@
 sudo losetup /dev/loop0 storage_vgc.img
 sudo mount /dev/loop0 mount
 
-# Create a symbolic link to the loop device in the current directory
-ln -sf /dev/loop0 <device-file>
+# Remove existing symbolic link (if any) and create a new one
+if [ -L /dev/device_file ]; then
+    sudo rm /dev/device_file
+fi
+sudo ln -sf /dev/loop0 /dev/device_file
 
-# Add the files
+# Add the files from bin to the mounted directory
 [ -d mount/bin ] || mkdir mount/bin
 cp bin/* mount/bin/
+
+# Start the game
+echo "Starting game_snake..."
+./mount/bin/game_snake

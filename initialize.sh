@@ -12,6 +12,7 @@ mkfs.ext4 "storage_vgc.img"
 
 # Compile C source files
 mkdir -p bin
+rm -rf bin/*  # Ensure bin is empty before compiling
 gcc src/game_snake.c -o bin/game_snake
 gcc src/game_blackcheck.c -o bin/game_blackcheck
 gcc src/game_platform.c -o bin/game_platform

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Unmount the image if it's already mounted
 if mount | grep "storage_vgc.img" > /dev/null; then
     sudo umount mount
@@ -9,8 +7,8 @@ fi
 sudo losetup -d /dev/loop0
 
 # Remove the symbolic link if it exists
-if [ -L <device-file> ]; then
-    rm <device-file>
+if [ -L /dev/device_file ]; then
+    sudo rm /dev/device_file
 fi
 
 # Clean up the mount directory
