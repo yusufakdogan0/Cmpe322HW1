@@ -15,7 +15,3 @@ sudo ln -sf /dev/loop0 /dev/device_file
 [ -d mount/bin ] || mkdir mount/bin
 cp bin/* mount/bin/
 sudo chmod +x mount/bin*
-
-
-# Start the game
-.mount/bin/main_screen
