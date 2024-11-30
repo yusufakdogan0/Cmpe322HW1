@@ -110,6 +110,9 @@ void drop_gold() {
 
 // Update the grid and check for collisions
 void update_game() {
+    if(game_over){
+        return;
+    }
     for (int i = HEIGHT - 2; i >= 0; i--) {
         for (int j = 0; j < WIDTH; j++) {
             if (grid[i][j] == 'G') {
