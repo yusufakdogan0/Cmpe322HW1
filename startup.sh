@@ -18,4 +18,4 @@ sudo chmod +x mount/bin*
 
 
 # Start the game
-./bin/mount/main_screen
+.mount/bin/main_screen

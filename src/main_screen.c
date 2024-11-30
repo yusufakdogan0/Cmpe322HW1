@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <termios.h>
 #include <string.h>
 #include <sys/wait.h>
 
@@ -10,36 +11,62 @@ const char *games[] = {"game_snake", "game_platform", "game_blackjack", "Exit"};
 int current_game = 0;
 int total_games = sizeof(games) / sizeof(games[0]);
 
+struct termios orig_termios;
+
+// Restore terminal settings on exit
+void reset_terminal_mode() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
+}
+
+// Set terminal to raw mode for key detection
+void set_terminal_mode() {
+    struct termios new_termios;
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    atexit(reset_terminal_mode);
+    new_termios = orig_termios;
+    new_termios.c_lflag &= ~(ICANON | ECHO); // Disable line buffering and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
+}
+
 // Signal handler for graceful exit
 void handle_signal(int signal) {
-    printf("\nExiting gracefully...\n");
+    reset_terminal_mode();
+    printf("Exiting gracefully...\n");
     system("clear");
     exit(0);
 }
 
 // Signal handler for SIGINT/SIGTERM in the child process
 void child_signal_handler(int signal) {
-    printf("Exiting game gracefully...\n");
-    exit(0);
+    // Gracefully exit child game process and return to the main screen
+    printf("Exiting gracefully...\n");
+    exit(0);  // This will terminate the game and return control to the main screen
 }
 
 void prevent_signal_handler(int sig) {
+    // Handle signals in the parent process (prevent termination)
     printf("Parent process received signal %d, ignoring...\n", sig);
 }
+
+
 
 // Run the selected game as a child process
 void run_game(const char *game) {
     pid_t pid = fork();
+
     if (pid == 0) {  // Child process
+        // Register signal handlers for SIGINT and SIGTERM in the child process
         signal(SIGINT, child_signal_handler);
         signal(SIGTERM, child_signal_handler);
+
+        // Launch the game
         execl(game, game, NULL);
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
-    } else if (pid > 0) {  // Parent process
+    } else if (pid > 0) {  // Parent process (main screen)
         signal(SIGINT, prevent_signal_handler);
         signal(SIGTERM, prevent_signal_handler);
-        wait(NULL);
+        wait(NULL);// Wait for the child process to finish
     } else {
         perror("Fork failed");
         exit(EXIT_FAILURE);
@@ -50,7 +77,7 @@ void run_game(const char *game) {
 void display_menu() {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
-
+    
     while (1) {
         system("clear");
         printf("Video Game Console Main Screen\n");
@@ -64,21 +91,23 @@ void display_menu() {
 
         char input = getchar();
         switch (input) {
-            case 'w':
+            case 'w': // Navigate up
                 current_game = (current_game - 1 + total_games) % total_games;
                 break;
-            case 's':
+            case 's': // Navigate down
                 current_game = (current_game + 1) % total_games;
                 break;
-            case '\n':
+            case '\n': // Enter key to start game
                 if (strcmp(games[current_game], "Exit") == 0) {
+                    reset_terminal_mode();
                     printf("\nExiting gracefully...\n");
                     exit(0);
                 } else {
                     run_game(games[current_game]);
                 }
                 break;
-            case 'q':
+            case 'q': // Quit the main screen
+                reset_terminal_mode();
                 printf("\nExiting gracefully...\n");
                 exit(0);
                 break;
@@ -89,5 +118,6 @@ void display_menu() {
 }
 
 int main() {
+    set_terminal_mode();
     display_menu();
 }
