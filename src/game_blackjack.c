@@ -27,7 +27,7 @@ void game();
 void endOfGame(){
     if (gameOver == 0){ return;}
     if (gameOver == 1){
-        printf("Only idiots would quit after betting the money");
+        printf("Only idiots would quit after betting the money\n");
     }
     if (gameOver == 2){
         printf("This place was not for cowards nor beggars!!! (You got beaten up and thrown out) \n");
@@ -35,7 +35,7 @@ void endOfGame(){
     if (gameOver == 3){
         printf("The other guy quit because he did not have enough money to bet \n");
     }
-    printf("Enter r for replay, enter q for exit");
+    printf("Enter r for replay, enter q for exit\n");
     char choice;
     scanf(" %c", &choice);
     if(choice == 'r'){
@@ -136,8 +136,8 @@ void determine_winner(int bet) {
         yourMoney += bet;
     }
     
-    printf("Your Point: $%d", yourScore);
-    printf("Kurpier: $%d", botScore);
+    printf("Your Point: $%d\n", yourScore);
+    printf("Kurpier: $%d\n", botScore);
     printf("Your Money: $%d\n", yourMoney);
     sleep(2);
 
@@ -160,7 +160,7 @@ void game(){
     while (gameOver==0 && yourMoney > 0) {
         system("clear");
         initialize_deck();
-        printf("Your money: $%d", yourMoney);
+        printf("Your money: $%d\n", yourMoney);
         printf("Enter your bet: ");
         int bet = 0;
         int valid = scanf("%d", &bet);

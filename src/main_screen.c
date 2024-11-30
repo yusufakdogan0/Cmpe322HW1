@@ -9,8 +9,8 @@
 // Game list
 const char *games[] = {"game_snake", "game_platform", "game_blackjack", "Exit"};
 int current_game = 0;
+int child_id = 0;
 int total_games = sizeof(games) / sizeof(games[0]);
-
 struct termios orig_termios;
 
 // Restore terminal settings on exit
@@ -31,6 +31,9 @@ void set_terminal_mode() {
 // Signal handler for graceful exit
 void handle_signal(int signal) {
     reset_terminal_mode();
+    if (child_id != 0){
+        kill(child_id, signal);
+    }
     printf("Exiting gracefully...\n");
     exit(0);
 }
@@ -65,9 +68,11 @@ void run_game(const char *game) {
         perror("Failed to launch game");
         exit(EXIT_FAILURE);
     } else if (pid > 0) {  // Parent process (main screen)
+        child_id = pid;
         signal(SIGINT, prevent_signal_handler);
         signal(SIGTERM, handle_signal);
         wait(NULL);// Wait for the child process to finish
+        child_id = 0;
         set_terminal_mode();
     } else {
         perror("Fork failed");
